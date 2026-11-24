@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habitalia Rush</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div id="audio-overlay" class="audio-overlay">
+      <div class="audio-content">
+        <h2>🔊 Activar sonido</h2>
+        <p>Haz clic para iniciar la experiencia de juego</p>
+        <button id="btn-activar-audio" class="btn-primary">ENTRAR AL JUEGO</button>
+      </div>
+    </div>
+
+    <section id="view-menu" class="view active">
+      <div class="container">
+        <h1 class="game-title">HABITALIA RUSH</h1>
+        <p class="subtitle">Despacho de arquitectura y gestión de obras</p>
+        <div class="input-group">
+          <label for="input-nombre">Introduce tu nombre</label>
+          <input type="text" id="input-nombre" placeholder="Tu nombre..." maxlength="20">
+        </div>
+        <div class="btn-group">
+          <button id="btn-jugar-online" class="btn btn-large btn-primary">JUGAR ONLINE</button>
+          <button id="btn-jugar-bots" class="btn btn-large btn-secondary">JUGAR CON BOTS</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-bots" class="view">
+      <div class="container">
+        <button id="btn-back-menu" class="btn-back">← Volver</button>
+        <h2 class="view-title">Elige tu personaje</h2>
+        <div class="carousel-container">
+          <button id="carousel-prev" class="carousel-btn prev">‹</button>
+          <div class="carousel-track" id="carousel-bots-track"></div>
+          <button id="carousel-next" class="carousel-btn next">›</button>
+        </div>
+        <p class="carousel-info" id="carousel-bots-info">Seleccionado: Salvador</p>
+        <button id="btn-iniciar-bots" class="btn btn-large btn-primary" disabled>INICIAR JUEGO</button>
+      </div>
+    </section>
+
+    <section id="view-online" class="view">
+      <div class="container">
+        <button id="btn-back-menu-online" class="btn-back">← Volver</button>
+        <h2 class="view-title">Jugar Online</h2>
+        <div class="online-options">
+          <div class="option-card">
+            <h3>Crear Sala</h3>
+            <div class="input-group">
+              <label>Límite de jugadores</label>
+              <select id="select-max-jugadores">
+                <option value="10">10 jugadores</option>
+                <option value="15">15 personajes</option>
+              </select>
+            </div>
+            <button id="btn-crear-sala" class="btn btn-primary">CREAR SALA</button>
+          </div>
+          <div class="option-card">
+            <h3>Unirse a Sala</h3>
+            <div class="input-group">
+              <label>Código de sala (4 letras)</label>
+              <input type="text" id="input-codigo-sala" placeholder="ABCD" maxlength="4">
+            </div>
+            <button id="btn-unirse-sala" class="btn btn-primary">UNIRSE</button>
+          </div>
+        </div>
+        <div id="mensaje-error-online" class="error-message"></div>
+      </div>
+    </section>
+
+    <section id="view-lobby" class="view">
+      <div class="container">
+        <div class="lobby-header">
+          <h2 class="view-title">Sala de Espera</h2>
+          <div class="codigo-sala-display">
+            <span class="codigo-label">Código:</span>
+            <span id="display-codigo-sala" class="codigo-valor"></span>
+            <button id="btn-copiar-codigo" class="btn-copiar">Copiar</button>
+          </div>
+        </div>
+        <div class="lobby-content">
+          <div class="lobby-personaje">
+            <h3>Tu personaje</h3>
+            <div class="carousel-container">
+              <button id="carousel-lobby-prev" class="carousel-btn prev">‹</button>
+              <div class="carousel-track" id="carousel-lobby-track"></div>
+              <button id="carousel-lobby-next" class="carousel-btn next">›</button>
+            </div>
+            <button id="btn-listo-lobby" class="btn btn-outline">❌ NO LISTO</button>
+          </div>
+          <div class="lobby-jugadores">
+            <h3>Jugadores en la sala</h3>
+            <div class="jugadores-grid" id="jugadores-grid"></div>
+          </div>
+        </div>
+        <button id="btn-iniciar-partida-host" class="btn btn-large btn-primary host-btn" disabled>INICIAR PARTIDA</button>
+        <button id="btn-abandonar-lobby" class="btn btn-outline">Abandonar sala</button>
+        <div id="mensaje-error-lobby" class="error-message"></div>
+      </div>
+    </section>
+
+    <section id="view-rules" class="view">
+      <div class="container">
+        <h2 class="view-title">Reglas del Juego</h2>
+        <div class="rules-content">
+          <div class="rules-section">
+            <h3>Objetivo</h3>
+            <p>Recoge <strong>15 Visados de Obra (📄)</strong> de los 50 repartidos por el mapa. ¡El primero en llegar a 15 gana!</p>
+          </div>
+          <div class="rules-section">
+            <h3>Controles</h3>
+            <p>Flechas de dirección o teclas <strong>W, A, S, D</strong> para moverte.</p>
+          </div>
+          <div class="rules-section">
+            <h3>Trampas</h3>
+            <div class="trampas-grid">
+              <div class="trampa-item">
+                <span class="trampa-emoji">👮‍♂️</span>
+                <div>
+                  <strong>Inspección de Trabajo</strong>
+                  <p>Te inmoviliza durante 3 segundos.</p>
+                </div>
+              </div>
+              <div class="trampa-item">
+                <span class="trampa-emoji">🥣</span>
+                <div>
+                  <strong>Cemento Fresco</strong>
+                  <p>Reduce tu velocidad al 50% durante 4 segundos.</p>
+                </div>
+              </div>
+              <div class="trampa-item">
+                <span class="trampa-emoji">💸</span>
+                <div>
+                  <strong>Multa Urbanística</strong>
+                  <p>Resta 2 visados (reaparecen en el mapa).</p>
+                </div>
+              </div>
+              <div class="trampa-item">
+                <span class="trampa-emoji">🔌</span>
+                <div>
+                  <strong>Corte de Luz</strong>
+                  <p>Invierte tus controles durante 3 segundos.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rules-status">
+          <span id="reglas-contador">Jugadores listos: <span id="reglas-num">0</span>/<span id="reglas-total">0</span></span>
+        </div>
+        <button id="btn-aceptar-reglas" class="btn btn-large btn-primary">ACEPTAR</button>
+        <button id="btn-saltar-reglas" class="btn btn-outline">Saltar</button>
+      </div>
+    </section>
+
+    <section id="view-countdown" class="view">
+      <div class="container">
+        <div class="countdown-display" id="countdown-num">3</div>
+        <div class="countdown-msg" id="countdown-msg">¡Prepárate!</div>
+      </div>
+    </section>
+
+    <section id="view-game" class="view">
+      <div class="game-ui">
+        <div class="hud">
+          <div class="hud-item">
+            <span class="hud-label">Visados</span>
+            <span id="hud-visados" class="hud-valor">0 / 15</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Tu personaje</span>
+            <span id="hud-personaje" class="hud-valor"></span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Líder</span>
+            <span id="hud-lider" class="hud-valor">—</span>
+          </div>
+        </div>
+        <div class="minimapa-container">
+          <canvas id="minimapa" width="150" height="150"></canvas>
+        </div>
+        <div id="mensaje-trampa" class="trampa-mensaje"></div>
+      </div>
+      <canvas id="canvas-juego"></canvas>
+    </section>
+
+    <section id="view-podium" class="view">
+      <div class="container">
+        <h2 class="view-title">🏆 Podio de Ganadores</h2>
+        <div class="podio" id="podio"></div>
+        <div class="podio-botones">
+          <button id="btn-volver-jugar" class="btn btn-large btn-primary">VOLVER A JUGAR</button>
+          <button id="btn-menu-principal" class="btn btn-large btn-secondary">MENÚ PRINCIPAL</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="client.js"></script>
+</body>
+</html>

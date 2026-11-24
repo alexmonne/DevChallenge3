@@ -1,0 +1,15 @@
+{
+  "name": "habitalia-rush",
+  "version": "1.0.0",
+  "description": "Habitalia Rush - Videojuego web multijugador 2D hyper-casual",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.1"
+  }
+}
