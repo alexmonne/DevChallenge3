@@ -9,12 +9,8 @@
 </head>
 <body>
   <div id="app">
-    <div id="audio-overlay" class="audio-overlay">
-      <div class="audio-content">
-        <h2>🔊 Activar sonido</h2>
-        <p>Haz clic para iniciar la experiencia de juego</p>
-        <button id="btn-activar-audio" class="btn-primary">ENTRAR AL JUEGO</button>
-      </div>
+    <div class="control-volumen">
+      <button id="btn-volumen" title="Activar/desactivar sonido">🔊</button>
     </div>
 
     <section id="view-menu" class="view active">
@@ -32,19 +28,7 @@
       </div>
     </section>
 
-    <section id="view-bots" class="view">
-      <div class="container">
-        <button id="btn-back-menu" class="btn-back">← Volver</button>
-        <h2 class="view-title">Elige tu personaje</h2>
-        <div class="carousel-container">
-          <button id="carousel-prev" class="carousel-btn prev">‹</button>
-          <div class="carousel-track" id="carousel-bots-track"></div>
-          <button id="carousel-next" class="carousel-btn next">›</button>
-        </div>
-        <p class="carousel-info" id="carousel-bots-info">Seleccionado: Salvador</p>
-        <button id="btn-iniciar-bots" class="btn btn-large btn-primary" disabled>INICIAR JUEGO</button>
-      </div>
-    </section>
+
 
     <section id="view-online" class="view">
       <div class="container">
@@ -68,10 +52,21 @@
               <label>Código de sala (4 letras)</label>
               <input type="text" id="input-codigo-sala" placeholder="ABCD" maxlength="4">
             </div>
+            <div id="mensaje-error-online" class="join-alert" style="display:none"></div>
             <button id="btn-unirse-sala" class="btn btn-primary">UNIRSE</button>
           </div>
         </div>
-        <div id="mensaje-error-online" class="error-message"></div>
+      </div>
+    </section>
+
+    <section id="view-join-transition" class="view">
+      <div class="container join-transition-wrap">
+        <div class="join-transition-card">
+          <div class="join-ok">✅ ¡Sala encontrada! Uniéndote a la partida...</div>
+          <div class="join-sub" id="join-transition-code">Sala: ----</div>
+          <div class="join-count" id="join-transition-count">3</div>
+          <div class="join-progress"><div class="join-progress-bar" id="join-transition-bar"></div></div>
+        </div>
       </div>
     </section>
 
@@ -84,6 +79,18 @@
             <span id="display-codigo-sala" class="codigo-valor"></span>
             <button id="btn-copiar-codigo" class="btn-copiar">Copiar</button>
           </div>
+        </div>
+        <div id="lobby-dificultad" class="lobby-dificultad">
+          <div class="input-group">
+            <label for="select-dificultad-lobby">Nivel de dificultad de los bots</label>
+            <select id="select-dificultad-lobby">
+              <option value="facil">Fácil</option>
+              <option value="medio" selected>Medio</option>
+              <option value="dificil">Difícil</option>
+              <option value="extremo">Extremo</option>
+            </select>
+          </div>
+          <p class="mensaje-bots">Selecciona el nivel de dificultad y pulsa <strong>INICIAR PARTIDA</strong> para comenzar la partida.</p>
         </div>
         <div class="lobby-content">
           <div class="lobby-personaje">
@@ -112,7 +119,7 @@
         <div class="rules-content">
           <div class="rules-section">
             <h3>Objetivo</h3>
-            <p>Recoge <strong>15 Visados de Obra (📄)</strong> de los 50 repartidos por el mapa. ¡El primero en llegar a 15 gana!</p>
+            <p>Recoge <strong>20 Contratos de Obra (📄)</strong> de los 50 repartidos por el mapa. ¡El primero en llegar a 20 gana!</p>
           </div>
           <div class="rules-section">
             <h3>Controles</h3>
@@ -125,7 +132,7 @@
                 <span class="trampa-emoji">👮‍♂️</span>
                 <div>
                   <strong>Inspección de Trabajo</strong>
-                  <p>Te inmoviliza durante 3 segundos.</p>
+                  <p>Te inmoviliza durante 5 segundos.</p>
                 </div>
               </div>
               <div class="trampa-item">
@@ -139,24 +146,27 @@
                 <span class="trampa-emoji">💸</span>
                 <div>
                   <strong>Multa Urbanística</strong>
-                  <p>Resta 2 visados (reaparecen en el mapa).</p>
+                  <p>Resta 4 contratos (sin bajar de 0, y los contratos restados reaparecen en el mapa).</p>
                 </div>
               </div>
               <div class="trampa-item">
                 <span class="trampa-emoji">🔌</span>
                 <div>
                   <strong>Corte de Luz</strong>
-                  <p>Invierte tus controles durante 3 segundos.</p>
+                  <p>Invierte tus controles durante 5 segundos.</p>
+                </div>
+              </div>
+              <div class="trampa-item">
+                <span class="trampa-emoji">💎</span>
+                <div>
+                  <strong>Cofre Sorpresa</strong>
+                  <p>Aparecen 3 cofres en el mapa. Quien lo abre es inmune; todos los demás reciben una trampa al azar (35% Cemento, 35% Corte de Luz, 20% Inspección, 10% Multa). El cofre reaparece tras 15 segundos.</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="rules-status">
-          <span id="reglas-contador">Jugadores listos: <span id="reglas-num">0</span>/<span id="reglas-total">0</span></span>
-        </div>
-        <button id="btn-aceptar-reglas" class="btn btn-large btn-primary">ACEPTAR</button>
-        <button id="btn-saltar-reglas" class="btn btn-outline">Saltar</button>
+        <div class="rules-reading">📖 Leyendo las normas...</div>
       </div>
     </section>
 
@@ -171,22 +181,31 @@
       <div class="game-ui">
         <div class="hud">
           <div class="hud-item">
-            <span class="hud-label">Visados</span>
-            <span id="hud-visados" class="hud-valor">0 / 15</span>
+            <span class="hud-label">Contratos</span>
+            <span id="hud-contratos" class="hud-valor">0 / 20</span>
           </div>
           <div class="hud-item">
             <span class="hud-label">Tu personaje</span>
             <span id="hud-personaje" class="hud-valor"></span>
           </div>
           <div class="hud-item">
+            <span class="hud-label">Habilidad</span>
+            <span id="hud-habilidad" class="hud-valor">—</span>
+          </div>
+          <div class="hud-item">
             <span class="hud-label">Líder</span>
             <span id="hud-lider" class="hud-valor">—</span>
           </div>
+        </div>
+        <div class="panel-control-juego">
+          <button id="btn-juego-abandonar" class="btn-juego btn-juego--abandonar">⛔ Abandonar partida</button>
+          <button id="btn-juego-pausar" class="btn-juego btn-juego--pausar">⏸️ Pausar partida</button>
         </div>
         <div class="minimapa-container">
           <canvas id="minimapa" width="150" height="150"></canvas>
         </div>
         <div id="mensaje-trampa" class="trampa-mensaje"></div>
+        <div id="mensaje-habilidad" class="trampa-mensaje"></div>
       </div>
       <canvas id="canvas-juego"></canvas>
     </section>
